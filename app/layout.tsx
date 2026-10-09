@@ -2,14 +2,14 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Atharva Nandurkar — Frontend Developer",
+  title: "Atharva Nandurkar — Full Stack Developer (MERN)",
   description:
-    "Atharva Nandurkar, Frontend Developer with 2+ years of experience building responsive web applications with React.js and Next.js.",
+    "Atharva Nandurkar, Full Stack Developer with 2+ years of experience building responsive and scalable web applications using React.js, Next.js, Node.js, Express.js, and MongoDB.",
   metadataBase: new URL("https://example.com"),
   openGraph: {
-    title: "Atharva Nandurkar — Frontend Developer",
+    title: "Atharva Nandurkar — Full Stack Developer (MERN)",
     description:
-      "Frontend Developer with 2+ years of experience building responsive web applications with React.js and Next.js.",
+      "Full Stack Developer with 2+ years of experience building responsive and scalable web applications using React.js, Next.js, Node.js, Express.js, and MongoDB.",
     type: "website",
   },
 };

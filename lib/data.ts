@@ -2,7 +2,7 @@
 
 export const profile = {
   name: "Atharva Nandurkar",
-  title: "Frontend Developer",
+  title: "Full Stack Developer (MERN)",
   location: "Pune, India",
   email: "atharvanandurkar2411@gmail.com",
   github: "https://github.com/atharvanan",
@@ -14,7 +14,7 @@ export const profile = {
 export const about = {
   headline: "Building digital experiences with modern web technologies.",
   summary:
-    "Frontend Developer with 2+ years of experience building responsive web applications using React.js, Next.js, JavaScript, HTML5, CSS3, and Tailwind CSS. Skilled in REST API integration, state management, reusable components, UI debugging, performance optimization, and Microsoft Azure deployment workflows.",
+    "Full Stack Developer with 2+ years of experience building responsive and scalable web applications using React.js, Next.js, Node.js, Express.js, and MongoDB. Skilled in developing REST APIs, implementing JWT-based authentication, managing application state, and building reusable UI components. Experienced in Microsoft Azure deployment and CI/CD workflows, with a focus on clean code, performance optimization, and delivering reliable end-to-end web solutions.",
   education: {
     degree: "B.E. Electrical Engineering",
     school: "Yeshwantrao Chavan College of Engineering, Nagpur, India",
@@ -23,6 +23,7 @@ export const about = {
   certifications: [
     "Microsoft Certified: Azure Fundamentals (AZ-900)",
     "Microsoft Certified: Azure Developer Associate (AZ-204)",
+    "Microsoft Certified: Azure DevOps Engineer Expert (AZ-400)",
   ],
 };
 
@@ -66,28 +67,28 @@ export type ExperienceEntry = {
 
 export const experience: ExperienceEntry[] = [
   {
-    role: "Frontend Developer",
+    role: "Full Stack Developer",
     company: "Utilized Private Ltd.",
-    location: "Gurugram, India",
+    location: "Gurugram, India (Remote)",
     period: "Apr 2025 – Dec 2025",
     bullets: [
-      "Managed and enhanced the company's website and web application interfaces using React.js, Next.js, JavaScript, HTML5, CSS3, and Tailwind CSS, ensuring a consistent, responsive, and user-friendly experience.",
-      "Implemented authentication workflows, integrated frontend features with backend APIs, and used Redux for state management across multiple application modules.",
-      "Improved web accessibility and cross-browser compatibility using Chrome DevTools, while contributing to feature development, bug fixes, code reviews, and GitHub-based deployment workflows in a fast-paced EdTech environment.",
+      "Built and shipped full-stack features end-to-end - REST APIs with Node.js/Express.js, MongoDB data handling, and React.js/Next.js UI for an EdTech platform used by students and instructors.",
+      "Implemented JWT-based authentication workflows and integrated frontend features with backend APIs using Axios and Redux Toolkit for state management across course and dashboard modules.",
+      "Improved cross-browser compatibility and UI consistency, reducing recurring UI-related bug reports, while contributing to Agile code reviews and CI/CD deployment workflows.",
     ],
   },
   {
-    role: "Frontend Developer (React.js Developer)",
+    role: "Full Stack Developer (MERN)",
     company: "Microland Private Ltd.",
     location: "Mumbai, India",
     period: "Jun 2023 – Feb 2025",
     bullets: [
-      "Developed and maintained responsive React.js applications using HTML5, CSS3, and Tailwind CSS, delivering scalable UI features across multiple user-facing modules.",
-      "Built 10+ reusable React components and custom hooks to improve code maintainability, consistency, and feature development efficiency.",
-      "Implemented state management using Context API and Redux Toolkit for complex UI workflows and predictable application behavior.",
-      "Integrated 5+ REST APIs using Axios, managing asynchronous data fetching, loading states, and error handling for reliable user experiences.",
-      "Improved frontend performance using Chrome DevTools and Lighthouse by reducing unnecessary re-renders, optimizing component rendering, and resolving UI bottlenecks.",
-      "Collaborated in Agile teams using Git/GitHub, participated in code reviews, and contributed to Azure-based deployment and release workflows.",
+      "Developed and maintained scalable React.js applications for a BFSI platform, delivering responsive UI features across 5+ modules using Tailwind CSS.",
+      "Built 10+ reusable React components and custom hooks, improving maintainability and reducing feature development time by 20%.",
+      "Debugged and modified MongoDB queries and Node.js/Express API logic, resolving data validation issues across 15+ backend endpoints.",
+      "Integrated JWT-based authentication on the frontend and consumed secure REST APIs using Axios, managing session state across modules.",
+      "Improved frontend performance using Chrome DevTools and Lighthouse, reducing unnecessary re-renders and page load time by 15%.",
+      "Deployed application updates on Microsoft Azure and contributed to CI/CD pipelines via Git/GitHub in Agile release cycles.",
     ],
   },
 ];
@@ -128,9 +129,12 @@ export const skillGroups = [
       "Responsive Design",
       "Web Accessibility (a11y)",
       "REST API Integration",
+      "REST API Development",
       "Server-Side Rendering (SSR)",
       "Authentication (JWT/OAuth)",
+      "Role-Based Access Control (RBAC)",
       "CI/CD Pipelines",
+      "MVC Architecture",
     ],
   },
   {
