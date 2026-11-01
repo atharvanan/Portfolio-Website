@@ -21,6 +21,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="scroll-smooth">
+      <head>
+        <script
+          defer
+          src="https://fieldwork-rum.vercel.app/rum.min.js"
+          data-key="rum_d5097549c82b39bd397e9983f26a3529"
+          data-release="1.0.0"
+        />
+      </head>
       <body className="font-sans antialiased text-ink">{children}</body>
     </html>
   );
