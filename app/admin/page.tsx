@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   PortfolioData,
   defaultPortfolioData,
@@ -19,6 +20,7 @@ export default function AdminDashboardPage() {
   const [data, setData] = useState<PortfolioData>(defaultPortfolioData);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("experience");
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
 
@@ -75,7 +77,8 @@ export default function AdminDashboardPage() {
         return;
       }
 
-      showToast("🎉 Changes saved! Live website updated instantly.", "success");
+      setHasUnsavedChanges(false);
+      showToast("Changes saved successfully! Live website updated.", "success");
     } catch (err) {
       showToast((err as Error).message || "An error occurred while saving.", "error");
     } finally {
@@ -95,6 +98,7 @@ export default function AdminDashboardPage() {
     const list = [...data.experience];
     list[index] = { ...list[index], [field]: value };
     setData({ ...data, experience: list });
+    setHasUnsavedChanges(true);
   };
 
   const updateBulletPoint = (jobIndex: number, bulletIndex: number, text: string) => {
@@ -103,6 +107,7 @@ export default function AdminDashboardPage() {
     bullets[bulletIndex] = text;
     list[jobIndex] = { ...list[jobIndex], bullets };
     setData({ ...data, experience: list });
+    setHasUnsavedChanges(true);
   };
 
   const addBulletPoint = (jobIndex: number) => {
@@ -110,6 +115,7 @@ export default function AdminDashboardPage() {
     const bullets = [...list[jobIndex].bullets, ""];
     list[jobIndex] = { ...list[jobIndex], bullets };
     setData({ ...data, experience: list });
+    setHasUnsavedChanges(true);
   };
 
   const removeBulletPoint = (jobIndex: number, bulletIndex: number) => {
@@ -117,6 +123,7 @@ export default function AdminDashboardPage() {
     const bullets = list[jobIndex].bullets.filter((_, idx) => idx !== bulletIndex);
     list[jobIndex] = { ...list[jobIndex], bullets };
     setData({ ...data, experience: list });
+    setHasUnsavedChanges(true);
   };
 
   const addExperienceRecord = () => {
@@ -130,6 +137,7 @@ export default function AdminDashboardPage() {
       technologies: ["React.js", "Node.js"],
     };
     setData({ ...data, experience: [newJob, ...data.experience] });
+    setHasUnsavedChanges(true);
     showToast("Added new experience record");
   };
 
@@ -137,6 +145,7 @@ export default function AdminDashboardPage() {
     if (!confirm("Are you sure you want to delete this experience record?")) return;
     const list = data.experience.filter((_, idx) => idx !== index);
     setData({ ...data, experience: list });
+    setHasUnsavedChanges(true);
   };
 
   // ---------------------------------------------------------------------------
@@ -146,6 +155,7 @@ export default function AdminDashboardPage() {
     const list = [...data.projects];
     list[index] = { ...list[index], [field]: value };
     setData({ ...data, projects: list });
+    setHasUnsavedChanges(true);
   };
 
   const addProject = () => {
@@ -159,6 +169,7 @@ export default function AdminDashboardPage() {
       githubUrl: "",
     };
     setData({ ...data, projects: [newProj, ...data.projects] });
+    setHasUnsavedChanges(true);
     showToast("Added new project");
   };
 
@@ -166,6 +177,7 @@ export default function AdminDashboardPage() {
     if (!confirm("Are you sure you want to delete this project?")) return;
     const list = data.projects.filter((_, idx) => idx !== index);
     setData({ ...data, projects: list });
+    setHasUnsavedChanges(true);
   };
 
   // ---------------------------------------------------------------------------
@@ -175,6 +187,7 @@ export default function AdminDashboardPage() {
     const list = [...data.certifications];
     list[index] = { ...list[index], [field]: value };
     setData({ ...data, certifications: list });
+    setHasUnsavedChanges(true);
   };
 
   const addCert = () => {
@@ -187,19 +200,51 @@ export default function AdminDashboardPage() {
       credentialUrl: "",
     };
     setData({ ...data, certifications: [...data.certifications, newCert] });
+    setHasUnsavedChanges(true);
     showToast("Added new certification");
   };
 
   const deleteCert = (index: number) => {
+    if (!confirm("Are you sure you want to delete this certification?")) return;
     const list = data.certifications.filter((_, idx) => idx !== index);
     setData({ ...data, certifications: list });
+    setHasUnsavedChanges(true);
+  };
+
+  // ---------------------------------------------------------------------------
+  // Education Handlers
+  // ---------------------------------------------------------------------------
+  const updateEducation = (index: number, field: keyof EducationEntry, value: string) => {
+    const list = [...data.education];
+    list[index] = { ...list[index], [field]: value };
+    setData({ ...data, education: list });
+    setHasUnsavedChanges(true);
+  };
+
+  const addEducation = () => {
+    const newEdu: EducationEntry = {
+      id: `edu-${Date.now()}`,
+      degree: "Degree Name",
+      school: "University / Institute Name",
+      years: "2020 – 2024",
+    };
+    setData({ ...data, education: [...data.education, newEdu] });
+    setHasUnsavedChanges(true);
+    showToast("Added new education entry");
+  };
+
+  const deleteEducation = (index: number) => {
+    if (!confirm("Are you sure you want to delete this education entry?")) return;
+    const list = data.education.filter((_, idx) => idx !== index);
+    setData({ ...data, education: list });
+    setHasUnsavedChanges(true);
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white flex flex-col items-center justify-center text-muted font-sans">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent mb-4" />
-        <p className="text-[15px] font-medium">Loading workspace...</p>
+      <div className="min-h-screen bg-surface flex flex-col items-center justify-center text-muted font-sans">
+        <div className="h-7 w-7 animate-spin rounded-full border-2 border-accent border-t-transparent mb-3" />
+        <p className="text-sm font-medium text-ink">Loading editor...</p>
       </div>
     );
   }
@@ -214,75 +259,73 @@ export default function AdminDashboardPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white text-ink font-sans antialiased selection:bg-accent/15 selection:text-accent">
+    <div className="min-h-screen bg-surface text-ink font-sans antialiased selection:bg-accent/15 selection:text-accent">
       {/* =================================================================== */}
-      {/* Sticky Header matching the exact Portfolio Navbar                   */}
+      {/* 1. Sleek Apple Studio Fixed Header                                 */}
       {/* =================================================================== */}
-      <header className="fixed inset-x-0 top-0 z-50 h-14 backdrop-blur-2xl bg-white/85 border-b border-black/[0.08] shadow-[0_1px_3px_rgba(0,0,0,0.03)] transition-all duration-500 ease-apple">
-        <div className="mx-auto flex h-full max-w-content-wide items-center justify-between px-6">
-          {/* Brand */}
-          <div className="flex items-center gap-3">
-            <span className="text-[15px] font-semibold tracking-tight text-ink">
-              {data.profile.name}
-            </span>
-            <span className="inline-block rounded-full bg-accent/[0.08] px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-accent border border-accent/20">
-              CMS Editor
-            </span>
+      <header className="sticky top-0 z-50 bg-white/90 backdrop-blur-xl border-b border-hair/70">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+          {/* Left: User Identity */}
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="h-9 w-9 overflow-hidden rounded-full ring-1 ring-black/10 shrink-0">
+              <Image
+                src={data.profile.photo}
+                alt={data.profile.name}
+                width={36}
+                height={36}
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div className="min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-[15px] font-semibold text-ink truncate">
+                  {data.profile.name}
+                </span>
+                <span className="text-[11px] font-medium px-2 py-0.5 rounded-md bg-surface text-muted border border-hair/60 hidden sm:inline-block">
+                  Admin Studio
+                </span>
+              </div>
+            </div>
           </div>
 
-          {/* Center Tabs Navigation */}
-          <nav className="relative hidden items-center gap-1 sm:gap-4 md:gap-7 lg:gap-8 md:flex">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`relative py-4 text-[14px] transition-colors duration-300 flex items-center gap-1.5 ${
-                  activeTab === tab.id ? "text-ink font-semibold" : "text-muted hover:text-ink font-normal"
-                }`}
-              >
-                <span>{tab.label}</span>
-                {typeof tab.count === "number" && (
-                  <span
-                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-medium transition-colors ${
-                      activeTab === tab.id
-                        ? "bg-accent/15 text-accent"
-                        : "bg-black/[0.05] text-muted"
-                    }`}
-                  >
-                    {tab.count}
-                  </span>
-                )}
-                <span
-                  className={`absolute inset-x-0 -bottom-[1px] h-[2px] rounded-full bg-ink transition-all duration-500 ease-apple ${
-                    activeTab === tab.id ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"
-                  }`}
-                />
-              </button>
-            ))}
-          </nav>
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2.5 shrink-0">
+            {hasUnsavedChanges && (
+              <span className="text-xs font-medium text-amber-600 bg-amber-50 px-2.5 py-1 rounded-full border border-amber-200/80 hidden sm:inline-block animate-pulse">
+                Unsaved edits
+              </span>
+            )}
 
-          {/* Right Action Buttons */}
-          <div className="flex items-center gap-3">
             <a
               href="/"
               target="_blank"
               rel="noopener noreferrer"
-              className="pill-btn border-[1.5px] border-hair text-ink text-[13px] py-1.5 px-4 hover:border-ink hover:text-ink transition-all duration-300 hidden sm:inline-flex"
+              className="pill-btn text-xs font-medium text-muted hover:text-ink px-3 py-1.5 border border-hair/80 hover:border-hair bg-white transition-all hidden sm:inline-flex items-center gap-1"
             >
-              Live Site&nbsp;↗
+              <span>View Site</span>
+              <span className="text-[11px]">↗</span>
             </a>
 
             <button
               onClick={handleSave}
               disabled={saving}
-              className="pill-btn bg-accent text-white hover:bg-accent-hover text-[13px] py-1.5 px-5 shadow-[0_2px_12px_rgba(0,113,227,0.25)] hover:shadow-[0_4px_16px_rgba(0,113,227,0.35)] disabled:opacity-50 transition-all duration-300"
+              className="pill-btn bg-accent text-white hover:bg-accent-hover text-xs font-semibold px-4 py-2 shadow-sm disabled:opacity-50 transition-all flex items-center gap-1.5"
             >
-              {saving ? "Saving…" : "Save Changes"}
+              {saving ? (
+                <>
+                  <span className="h-3 w-3 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                  <span>Saving...</span>
+                </>
+              ) : (
+                <>
+                  <span>Save Changes</span>
+                </>
+              )}
             </button>
 
             <button
               onClick={handleLogout}
-              className="text-xs text-muted hover:text-ink transition-colors ml-1"
+              className="text-xs text-muted hover:text-ink p-2 rounded-lg hover:bg-surface transition-colors"
               title="Sign Out"
             >
               Exit
@@ -290,29 +333,49 @@ export default function AdminDashboardPage() {
           </div>
         </div>
 
-        {/* Mobile Sub-Navigation Bar */}
-        <div className="flex items-center gap-2 overflow-x-auto px-6 py-2 border-t border-black/[0.04] bg-surface/80 md:hidden no-scrollbar">
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-3 py-1 rounded-full text-xs whitespace-nowrap transition-colors ${
-                activeTab === tab.id
-                  ? "bg-ink text-white font-medium"
-                  : "bg-white text-muted border border-black/[0.06]"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
+        {/* =================================================================== */}
+        {/* 2. Spacious Horizontal Segmented Navigation Tab Bar                 */}
+        {/* =================================================================== */}
+        <div className="border-t border-hair/40 bg-surface/60">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6">
+            <nav className="flex items-center gap-1.5 py-2.5 overflow-x-auto no-scrollbar">
+              {tabs.map((tab) => {
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`pill-btn text-xs font-medium py-1.5 px-3.5 whitespace-nowrap transition-all duration-200 flex items-center gap-1.5 ${
+                      isActive
+                        ? "bg-ink text-white shadow-sm"
+                        : "text-muted hover:text-ink hover:bg-white/80"
+                    }`}
+                  >
+                    <span>{tab.label}</span>
+                    {typeof tab.count === "number" && (
+                      <span
+                        className={`text-[10px] font-semibold px-1.5 py-0.2 rounded-full ${
+                          isActive
+                            ? "bg-white/20 text-white"
+                            : "bg-black/[0.06] text-muted"
+                        }`}
+                      >
+                        {tab.count}
+                      </span>
+                    )}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
         </div>
       </header>
 
       {/* Floating Toast Notification */}
       {notification && (
-        <div className="fixed bottom-8 inset-x-0 z-50 flex justify-center pointer-events-none px-4">
+        <div className="fixed bottom-6 inset-x-0 z-50 flex justify-center pointer-events-none px-4">
           <div
-            className={`pointer-events-auto rounded-full px-6 py-3.5 text-[14px] font-medium shadow-[0_12px_36px_rgba(0,0,0,0.18)] flex items-center gap-3 transition-all duration-500 ease-apple animate-fade-in-up ${
+            className={`pointer-events-auto rounded-full px-5 py-2.5 text-xs font-medium shadow-lg flex items-center gap-2 transition-all animate-fade-in-up ${
               notification.type === "success"
                 ? "bg-ink text-white"
                 : "bg-rose-600 text-white"
@@ -325,136 +388,143 @@ export default function AdminDashboardPage() {
       )}
 
       {/* =================================================================== */}
-      {/* Main Content Area                                                   */}
+      {/* 3. Main Editor Work Area                                           */}
       {/* =================================================================== */}
-      <main className="mx-auto max-w-content px-6 pt-28 pb-32">
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 pb-32">
         {/* ================================================================= */}
         {/* TAB 1: WORK EXPERIENCE                                            */}
         {/* ================================================================= */}
         {activeTab === "experience" && (
-          <section className="space-y-12">
-            {/* Section Header */}
-            <div className="flex flex-col items-center gap-3">
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
-                Career
-              </p>
-              <div className="section-divider" />
-              <h2 className="mt-4 text-center text-[32px] sm:text-[40px] md:text-[48px] font-semibold tracking-tight text-ink">
-                Work Experience
-              </h2>
-              <p className="mx-auto mt-2 max-w-xl text-center text-[17px] leading-[1.65] text-muted">
-                Edit roles, companies, dates, and responsibilities. Add or update individual bullet points.
-              </p>
+          <div className="space-y-6">
+            {/* Clean Section Header with Action */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-hair/60">
+              <div>
+                <h1 className="text-xl font-bold tracking-tight text-ink">
+                  Work Experience
+                </h1>
+                <p className="text-xs text-muted mt-0.5">
+                  Manage your employment history, roles, and accomplishments.
+                </p>
+              </div>
               <button
                 onClick={addExperienceRecord}
-                className="pill-btn border-[1.5px] border-accent text-accent hover:bg-accent hover:text-white text-sm py-2 px-6 mt-4"
+                className="pill-btn border border-hair hover:border-ink bg-white text-ink text-xs font-medium py-1.5 px-4 shadow-sm self-start sm:self-auto transition-all"
               >
-                + Add New Experience
+                + Add Experience
               </button>
             </div>
 
-            {/* List of Experience Cards */}
-            <div className="space-y-10 mt-12">
+            {/* List of Clean Experience Cards */}
+            <div className="space-y-5">
               {data.experience.map((job, jobIdx) => (
                 <div
                   key={job.id || jobIdx}
-                  className="group relative block overflow-hidden rounded-3xl bg-surface p-8 sm:p-12 transition-all duration-500 ease-apple border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.06)]"
+                  className="bg-white rounded-2xl border border-hair/70 p-5 sm:p-7 shadow-sm transition-all hover:border-hair"
                 >
-                  <div className="flex items-center justify-between border-b border-hair/70 pb-5 mb-6">
-                    <div className="flex items-center gap-3">
-                      <span className="inline-block rounded-full bg-accent/[0.08] px-3.5 py-1 text-[12px] font-medium tracking-wide text-accent">
-                        Experience #{jobIdx + 1}
+                  {/* Card Header */}
+                  <div className="flex items-center justify-between pb-4 mb-5 border-b border-hair/50">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 text-accent text-xs font-bold shrink-0">
+                        {jobIdx + 1}
+                      </span>
+                      <span className="font-semibold text-[15px] text-ink truncate">
+                        {job.role || "Untitled Role"}
+                        <span className="font-normal text-muted"> · {job.company || "Company"}</span>
                       </span>
                     </div>
                     <button
                       type="button"
                       onClick={() => deleteExperienceRecord(jobIdx)}
-                      className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors"
+                      className="text-xs font-medium text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-2.5 py-1 rounded-lg transition-colors shrink-0"
                     >
-                      Delete Record
+                      Delete
                     </button>
                   </div>
 
-                  {/* Primary Details Grid */}
+                  {/* Primary Fields Grid */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-accent mb-2">
-                        Job Title / Role
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
+                        Job Title
                       </label>
                       <input
                         type="text"
                         value={job.role}
                         onChange={(e) => updateExperience(jobIdx, "role", e.target.value)}
-                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] font-semibold text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                        placeholder="e.g. Full Stack Developer"
+                        className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all font-medium"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-accent mb-2">
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                         Company Name
                       </label>
                       <input
                         type="text"
                         value={job.company}
                         onChange={(e) => updateExperience(jobIdx, "company", e.target.value)}
-                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                        placeholder="e.g. Acme Corp"
+                        className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-accent mb-2">
-                        Duration (Period)
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
+                        Duration / Period
                       </label>
                       <input
                         type="text"
                         value={job.period}
                         onChange={(e) => updateExperience(jobIdx, "period", e.target.value)}
                         placeholder="e.g. Apr 2025 – Dec 2025"
-                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                        className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-accent mb-2">
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                         Location
                       </label>
                       <input
                         type="text"
                         value={job.location || ""}
                         onChange={(e) => updateExperience(jobIdx, "location", e.target.value)}
-                        placeholder="e.g. Gurugram, India (Remote)"
-                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                        placeholder="e.g. Mumbai, India (Remote)"
+                        className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                       />
                     </div>
                   </div>
 
-                  {/* Bullet Points with exact timeline style */}
+                  {/* Bullet Points: Clean, Comfortable, Edit-Friendly List */}
                   <div className="pt-2">
-                    <div className="flex items-center justify-between mb-4">
-                      <label className="text-xs font-semibold uppercase tracking-[0.15em] text-accent">
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="text-[11px] font-semibold uppercase tracking-wider text-muted">
                         Key Responsibilities & Bullet Points ({job.bullets.length})
                       </label>
                       <button
                         type="button"
                         onClick={() => addBulletPoint(jobIdx)}
-                        className="text-xs font-medium text-accent hover:underline flex items-center gap-1"
+                        className="text-xs font-semibold text-accent hover:underline flex items-center gap-1"
                       >
-                        + Add Bullet Point
+                        + Add Bullet
                       </button>
                     </div>
 
-                    <div className="space-y-3 pl-2 sm:pl-4 border-l-2 border-hair/60 relative">
+                    <div className="space-y-2.5">
                       {job.bullets.map((bullet, bulletIdx) => (
-                        <div key={bulletIdx} className="relative pl-6 flex items-start gap-3">
-                          <span className="absolute left-[-5px] top-4 h-2 w-2 rounded-full bg-accent ring-4 ring-surface" />
+                        <div key={bulletIdx} className="flex items-start gap-2.5">
+                          <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-surface text-[10px] font-semibold text-muted border border-hair/50 mt-2">
+                            {bulletIdx + 1}
+                          </span>
                           <textarea
                             rows={2}
                             value={bullet}
                             onChange={(e) => updateBulletPoint(jobIdx, bulletIdx, e.target.value)}
-                            placeholder="Describe achievement, feature built, or engineering impact..."
-                            className="flex-1 rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink leading-relaxed outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                            placeholder="Describe your achievement, responsibilities, or impact..."
+                            className="flex-1 rounded-xl border border-hair/70 bg-surface/30 px-3.5 py-2 text-sm text-ink leading-relaxed outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                           />
                           <button
                             type="button"
                             onClick={() => removeBulletPoint(jobIdx, bulletIdx)}
-                            className="text-muted hover:text-rose-500 mt-3 p-1 transition-colors text-sm"
+                            className="text-muted/60 hover:text-rose-500 hover:bg-rose-50 p-1.5 rounded-lg transition-colors mt-1.5"
                             title="Remove bullet"
                           >
                             ✕
@@ -462,11 +532,20 @@ export default function AdminDashboardPage() {
                         </div>
                       ))}
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={() => addBulletPoint(jobIdx)}
+                      className="w-full mt-3 py-2 border border-dashed border-hair/80 rounded-xl text-xs font-medium text-muted hover:text-accent hover:border-accent/40 hover:bg-accent/[0.02] transition-colors flex items-center justify-center gap-1"
+                    >
+                      <span>+</span>
+                      <span>Add another bullet point</span>
+                    </button>
                   </div>
 
                   {/* Technologies tags */}
-                  <div className="mt-6 pt-5 border-t border-hair/60">
-                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                  <div className="mt-5 pt-4 border-t border-hair/50">
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                       Technologies Used (comma separated)
                     </label>
                     <input
@@ -477,72 +556,90 @@ export default function AdminDashboardPage() {
                         updateExperience(jobIdx, "technologies", tags);
                       }}
                       placeholder="React.js, Next.js, Node.js, Express.js, MongoDB"
-                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                      className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                     />
+
+                    {job.technologies && job.technologies.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-2.5">
+                        {job.technologies.map((tech) => (
+                          <span
+                            key={tech}
+                            className="inline-block rounded-full bg-surface px-2.5 py-0.5 text-[11px] font-medium text-muted border border-hair/50"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
-          </section>
+          </div>
         )}
 
         {/* ================================================================= */}
         {/* TAB 2: PROJECTS                                                   */}
         {/* ================================================================= */}
         {activeTab === "projects" && (
-          <section className="space-y-12">
-            <div className="flex flex-col items-center gap-3">
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
-                Work
-              </p>
-              <div className="section-divider" />
-              <h2 className="mt-4 text-center text-[32px] sm:text-[40px] md:text-[48px] font-semibold tracking-tight text-ink">
-                Projects
-              </h2>
-              <p className="mx-auto mt-2 max-w-xl text-center text-[17px] leading-[1.65] text-muted">
-                Manage your featured portfolio projects, descriptions, tech stacks, and live demo links.
-              </p>
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-hair/60">
+              <div>
+                <h1 className="text-xl font-bold tracking-tight text-ink">
+                  Featured Projects
+                </h1>
+                <p className="text-xs text-muted mt-0.5">
+                  Edit your showcase projects, descriptions, tech stacks, and links.
+                </p>
+              </div>
               <button
                 onClick={addProject}
-                className="pill-btn border-[1.5px] border-accent text-accent hover:bg-accent hover:text-white text-sm py-2 px-6 mt-4"
+                className="pill-btn border border-hair hover:border-ink bg-white text-ink text-xs font-medium py-1.5 px-4 shadow-sm self-start sm:self-auto transition-all"
               >
-                + Add New Project
+                + Add Project
               </button>
             </div>
 
-            <div className="space-y-10 mt-12">
+            <div className="space-y-5">
               {data.projects.map((proj, idx) => (
                 <div
                   key={proj.id || idx}
-                  className="group relative block overflow-hidden rounded-3xl bg-surface p-8 sm:p-12 transition-all duration-500 ease-apple border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.06)]"
+                  className="bg-white rounded-2xl border border-hair/70 p-5 sm:p-7 shadow-sm transition-all hover:border-hair"
                 >
-                  <div className="flex items-center justify-between border-b border-hair/70 pb-5 mb-6">
-                    <span className="inline-block rounded-full bg-white px-4 py-1.5 text-xs font-medium tracking-wide text-muted shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
-                      Project #{idx + 1}
-                    </span>
+                  <div className="flex items-center justify-between pb-4 mb-5 border-b border-hair/50">
+                    <div className="flex items-center gap-2.5 min-w-0">
+                      <span className="flex h-6 w-6 items-center justify-center rounded-full bg-accent/10 text-accent text-xs font-bold shrink-0">
+                        {idx + 1}
+                      </span>
+                      <span className="font-semibold text-[15px] text-ink truncate">
+                        {proj.name || "Untitled Project"}
+                        {proj.year && <span className="font-normal text-muted"> ({proj.year})</span>}
+                      </span>
+                    </div>
                     <button
                       type="button"
                       onClick={() => deleteProject(idx)}
-                      className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors"
+                      className="text-xs font-medium text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-2.5 py-1 rounded-lg transition-colors shrink-0"
                     >
-                      Delete Project
+                      Delete
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
                     <div className="sm:col-span-2">
-                      <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-accent mb-2">
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                         Project Title
                       </label>
                       <input
                         type="text"
                         value={proj.name}
                         onChange={(e) => updateProject(idx, "name", e.target.value)}
-                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[18px] font-semibold text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                        placeholder="e.g. My Awesome App"
+                        className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all font-medium"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-accent mb-2">
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                         Year
                       </label>
                       <input
@@ -550,40 +647,27 @@ export default function AdminDashboardPage() {
                         value={proj.year || ""}
                         onChange={(e) => updateProject(idx, "year", e.target.value)}
                         placeholder="2026"
-                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                        className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                       />
                     </div>
                   </div>
 
-                  <div className="mb-5">
-                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                  <div className="mb-4">
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                       Description
                     </label>
                     <textarea
                       rows={3}
                       value={proj.description}
                       onChange={(e) => updateProject(idx, "description", e.target.value)}
-                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink leading-relaxed outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                      placeholder="Explain what problem it solves and what technologies made it happen..."
+                      className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3.5 py-2 text-sm text-ink leading-relaxed outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                     />
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
                     <div>
-                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
-                        Technologies (comma separated)
-                      </label>
-                      <input
-                        type="text"
-                        value={proj.tags ? proj.tags.join(", ") : ""}
-                        onChange={(e) => {
-                          const tags = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
-                          updateProject(idx, "tags", tags);
-                        }}
-                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                         Live Demo URL
                       </label>
                       <input
@@ -591,11 +675,11 @@ export default function AdminDashboardPage() {
                         value={proj.liveUrl || ""}
                         onChange={(e) => updateProject(idx, "liveUrl", e.target.value)}
                         placeholder="https://..."
-                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                        className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                         GitHub Repository URL
                       </label>
                       <input
@@ -603,74 +687,99 @@ export default function AdminDashboardPage() {
                         value={proj.githubUrl || ""}
                         onChange={(e) => updateProject(idx, "githubUrl", e.target.value)}
                         placeholder="https://github.com/..."
-                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                        className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                       />
                     </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
+                      Technologies & Tags (comma separated)
+                    </label>
+                    <input
+                      type="text"
+                      value={proj.tags ? proj.tags.join(", ") : ""}
+                      onChange={(e) => {
+                        const tags = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
+                        updateProject(idx, "tags", tags);
+                      }}
+                      placeholder="React.js, Tailwind CSS, Node.js"
+                      className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
+                    />
+                    {proj.tags && proj.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1.5 mt-2">
+                        {proj.tags.map((tag) => (
+                          <span
+                            key={tag}
+                            className="inline-block rounded-full bg-surface px-2.5 py-0.5 text-[11px] font-medium text-muted border border-hair/50"
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
             </div>
-          </section>
+          </div>
         )}
 
         {/* ================================================================= */}
         {/* TAB 3: CERTIFICATIONS                                             */}
         {/* ================================================================= */}
         {activeTab === "certifications" && (
-          <section className="space-y-12">
-            <div className="flex flex-col items-center gap-3">
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
-                Credentials
-              </p>
-              <div className="section-divider" />
-              <h2 className="mt-4 text-center text-[32px] sm:text-[40px] md:text-[48px] font-semibold tracking-tight text-ink">
-                Certifications
-              </h2>
-              <p className="mx-auto mt-2 max-w-xl text-center text-[17px] leading-[1.65] text-muted">
-                Add or modify certifications, issuing bodies, and credential verification URLs.
-              </p>
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-hair/60">
+              <div>
+                <h1 className="text-xl font-bold tracking-tight text-ink">
+                  Certifications
+                </h1>
+                <p className="text-xs text-muted mt-0.5">
+                  Manage your verified licenses, certificates, and credentials.
+                </p>
+              </div>
               <button
                 onClick={addCert}
-                className="pill-btn border-[1.5px] border-accent text-accent hover:bg-accent hover:text-white text-sm py-2 px-6 mt-4"
+                className="pill-btn border border-hair hover:border-ink bg-white text-ink text-xs font-medium py-1.5 px-4 shadow-sm self-start sm:self-auto transition-all"
               >
                 + Add Certification
               </button>
             </div>
 
-            <div className="space-y-6 mt-12">
+            <div className="space-y-4">
               {data.certifications.map((cert, idx) => (
                 <div
                   key={cert.id || idx}
-                  className="rounded-3xl bg-surface p-8 transition-all duration-500 ease-apple border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
+                  className="bg-white rounded-2xl border border-hair/70 p-5 sm:p-6 shadow-sm transition-all hover:border-hair"
                 >
-                  <div className="flex items-center justify-between border-b border-hair/70 pb-4 mb-5">
-                    <span className="text-xs font-semibold uppercase tracking-[0.15em] text-accent flex items-center gap-2">
-                      <span>🏅</span>
-                      <span>Certification #{idx + 1}</span>
+                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-hair/50">
+                    <span className="font-semibold text-sm text-ink">
+                      {cert.name || "Untitled Certification"}
                     </span>
                     <button
                       type="button"
                       onClick={() => deleteCert(idx)}
-                      className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors"
+                      className="text-xs font-medium text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-2 py-1 rounded-lg transition-colors"
                     >
                       Delete
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div className="lg:col-span-2">
-                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-4">
+                    <div className="sm:col-span-2">
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                         Certification Name
                       </label>
                       <input
                         type="text"
                         value={cert.name}
                         onChange={(e) => updateCert(idx, "name", e.target.value)}
-                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] font-medium text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                        className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all font-medium"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                         Issuer
                       </label>
                       <input
@@ -678,23 +787,26 @@ export default function AdminDashboardPage() {
                         value={cert.issuer || ""}
                         onChange={(e) => updateCert(idx, "issuer", e.target.value)}
                         placeholder="Microsoft, AWS, etc."
-                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                        className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                       />
                     </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
-                        Issue Year
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
+                        Year / Date
                       </label>
                       <input
                         type="text"
                         value={cert.issueDate || ""}
                         onChange={(e) => updateCert(idx, "issueDate", e.target.value)}
                         placeholder="2026"
-                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                        className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                       />
                     </div>
-                    <div className="lg:col-span-2">
-                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                    <div className="sm:col-span-2">
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                         Credential Verification URL
                       </label>
                       <input
@@ -702,62 +814,63 @@ export default function AdminDashboardPage() {
                         value={cert.credentialUrl || ""}
                         onChange={(e) => updateCert(idx, "credentialUrl", e.target.value)}
                         placeholder="https://..."
-                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                        className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                       />
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          </section>
+          </div>
         )}
 
         {/* ================================================================= */}
         {/* TAB 4: SKILLS                                                     */}
         {/* ================================================================= */}
         {activeTab === "skills" && (
-          <section className="space-y-12">
-            <div className="flex flex-col items-center gap-3">
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
-                Toolkit
-              </p>
-              <div className="section-divider" />
-              <h2 className="mt-4 text-center text-[32px] sm:text-[40px] md:text-[48px] font-semibold tracking-tight text-ink">
+          <div className="space-y-6">
+            <div className="pb-2 border-b border-hair/60">
+              <h1 className="text-xl font-bold tracking-tight text-ink">
                 Technical Skills
-              </h2>
-              <p className="mx-auto mt-2 max-w-xl text-center text-[17px] leading-[1.65] text-muted">
-                Update technologies, languages, and frameworks in each categorized skill group.
+              </h1>
+              <p className="text-xs text-muted mt-0.5">
+                Update technologies and frameworks categorized by group.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {data.skillGroups.map((group, idx) => (
                 <div
                   key={group.id || idx}
-                  className="rounded-3xl bg-surface p-7 border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.02)] transition-all duration-500 ease-apple"
+                  className="bg-white rounded-2xl border border-hair/70 p-5 shadow-sm space-y-3"
                 >
-                  <p className="text-[13px] font-semibold uppercase tracking-[0.15em] text-accent mb-4">
-                    {group.label}
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold uppercase tracking-wider text-accent">
+                      {group.label}
+                    </span>
+                    <span className="text-[11px] text-muted">
+                      {group.items.length} skills
+                    </span>
+                  </div>
 
                   <textarea
-                    rows={5}
+                    rows={3}
                     value={group.items.join(", ")}
                     onChange={(e) => {
                       const items = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
                       const list = [...data.skillGroups];
                       list[idx] = { ...list[idx], items };
                       setData({ ...data, skillGroups: list });
+                      setHasUnsavedChanges(true);
                     }}
-                    className="w-full rounded-2xl border border-hair/80 bg-white p-3.5 text-[14px] text-ink leading-relaxed outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                    className="w-full rounded-xl border border-hair/70 bg-surface/30 p-3 text-sm text-ink leading-relaxed outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                   />
 
-                  {/* Preview Pills matching the website */}
-                  <div className="flex flex-wrap gap-1.5 mt-4">
+                  <div className="flex flex-wrap gap-1 pt-1">
                     {group.items.map((item) => (
                       <span
                         key={item}
-                        className="rounded-full bg-white border border-black/[0.06] px-3 py-1 text-[12px] font-medium text-ink shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
+                        className="rounded-full bg-surface border border-hair/50 px-2.5 py-0.5 text-[11px] font-medium text-ink"
                       >
                         {item}
                       </span>
@@ -766,240 +879,262 @@ export default function AdminDashboardPage() {
                 </div>
               ))}
             </div>
-          </section>
+          </div>
         )}
 
         {/* ================================================================= */}
         {/* TAB 5: ABOUT & PROFILE                                            */}
         {/* ================================================================= */}
         {activeTab === "profile" && (
-          <section className="space-y-12">
-            <div className="flex flex-col items-center gap-3">
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
-                Profile
-              </p>
-              <div className="section-divider" />
-              <h2 className="mt-4 text-center text-[32px] sm:text-[40px] md:text-[48px] font-semibold tracking-tight text-ink">
-                About & Bio
-              </h2>
-              <p className="mx-auto mt-2 max-w-xl text-center text-[17px] leading-[1.65] text-muted">
-                Edit your introductory summary, bio paragraph, and contact links.
+          <div className="space-y-6">
+            <div className="pb-2 border-b border-hair/60">
+              <h1 className="text-xl font-bold tracking-tight text-ink">
+                About & Profile
+              </h1>
+              <p className="text-xs text-muted mt-0.5">
+                Edit your personal identity, bio summary, and social links.
               </p>
             </div>
 
-            <div className="rounded-3xl bg-surface p-8 sm:p-12 border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-8 mt-12">
+            <div className="bg-white rounded-2xl border border-hair/70 p-6 sm:p-7 shadow-sm space-y-6">
+              {/* Identity Details */}
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-accent mb-4 border-b border-hair/60 pb-2">
-                  Personal Details
-                </p>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted mb-3 pb-2 border-b border-hair/40">
+                  Basic Information
+                </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <div>
-                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                       Full Name
                     </label>
                     <input
                       type="text"
                       value={data.profile.name}
-                      onChange={(e) => setData({ ...data, profile: { ...data.profile, name: e.target.value } })}
-                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] font-semibold text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                      onChange={(e) => {
+                        setData({ ...data, profile: { ...data.profile, name: e.target.value } });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all font-medium"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
-                      Job Title / Subtitle
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
+                      Professional Title
                     </label>
                     <input
                       type="text"
                       value={data.profile.title}
-                      onChange={(e) => setData({ ...data, profile: { ...data.profile, title: e.target.value } })}
-                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                      onChange={(e) => {
+                        setData({ ...data, profile: { ...data.profile, title: e.target.value } });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                       Location
                     </label>
                     <input
                       type="text"
                       value={data.profile.location}
-                      onChange={(e) => setData({ ...data, profile: { ...data.profile, location: e.target.value } })}
-                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                      onChange={(e) => {
+                        setData({ ...data, profile: { ...data.profile, location: e.target.value } });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                     />
                   </div>
                 </div>
               </div>
 
+              {/* Bio & Headline */}
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-accent mb-4 border-b border-hair/60 pb-2">
-                  Headline & Summary
-                </p>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted mb-3 pb-2 border-b border-hair/40">
+                  Bio & Summary
+                </h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
-                      Headline (Large Heading in About)
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
+                      Headline (About Section Heading)
                     </label>
                     <input
                       type="text"
                       value={data.about.headline}
-                      onChange={(e) => setData({ ...data, about: { ...data.about, headline: e.target.value } })}
-                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[17px] font-semibold text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                      onChange={(e) => {
+                        setData({ ...data, about: { ...data.about, headline: e.target.value } });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all font-medium"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                       Professional Summary Paragraph
                     </label>
                     <textarea
                       rows={5}
                       value={data.about.summary}
-                      onChange={(e) => setData({ ...data, about: { ...data.about, summary: e.target.value } })}
-                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink leading-relaxed outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                      onChange={(e) => {
+                        setData({ ...data, about: { ...data.about, summary: e.target.value } });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3.5 py-2.5 text-sm text-ink leading-relaxed outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                     />
                   </div>
                 </div>
               </div>
 
+              {/* Contact Links */}
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-accent mb-4 border-b border-hair/60 pb-2">
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted mb-3 pb-2 border-b border-hair/40">
                   Contact & Links
-                </p>
+                </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                   <div>
-                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
-                      Email Address
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
+                      Email
                     </label>
                     <input
                       type="email"
                       value={data.profile.email}
-                      onChange={(e) => setData({ ...data, profile: { ...data.profile, email: e.target.value } })}
-                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                      onChange={(e) => {
+                        setData({ ...data, profile: { ...data.profile, email: e.target.value } });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                       Phone (Optional)
                     </label>
                     <input
                       type="text"
                       value={data.profile.phone || ""}
-                      onChange={(e) => setData({ ...data, profile: { ...data.profile, phone: e.target.value } })}
+                      onChange={(e) => {
+                        setData({ ...data, profile: { ...data.profile, phone: e.target.value } });
+                        setHasUnsavedChanges(true);
+                      }}
                       placeholder="+91 ..."
-                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                      className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                       GitHub URL
                     </label>
                     <input
                       type="url"
                       value={data.profile.github}
-                      onChange={(e) => setData({ ...data, profile: { ...data.profile, github: e.target.value } })}
-                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                      onChange={(e) => {
+                        setData({ ...data, profile: { ...data.profile, github: e.target.value } });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                    <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                       LinkedIn URL
                     </label>
                     <input
                       type="url"
                       value={data.profile.linkedin}
-                      onChange={(e) => setData({ ...data, profile: { ...data.profile, linkedin: e.target.value } })}
-                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                      onChange={(e) => {
+                        setData({ ...data, profile: { ...data.profile, linkedin: e.target.value } });
+                        setHasUnsavedChanges(true);
+                      }}
+                      className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                     />
                   </div>
                 </div>
               </div>
             </div>
-          </section>
+          </div>
         )}
 
         {/* ================================================================= */}
         {/* TAB 6: EDUCATION                                                  */}
         {/* ================================================================= */}
         {activeTab === "education" && (
-          <section className="space-y-12">
-            <div className="flex flex-col items-center gap-3">
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
-                Academics
-              </p>
-              <div className="section-divider" />
-              <h2 className="mt-4 text-center text-[32px] sm:text-[40px] md:text-[48px] font-semibold tracking-tight text-ink">
-                Education
-              </h2>
-              <p className="mx-auto mt-2 max-w-xl text-center text-[17px] leading-[1.65] text-muted">
-                Update your degree, institution, and years of study.
-              </p>
+          <div className="space-y-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-hair/60">
+              <div>
+                <h1 className="text-xl font-bold tracking-tight text-ink">
+                  Education
+                </h1>
+                <p className="text-xs text-muted mt-0.5">
+                  Update your degree, college, university, and graduation years.
+                </p>
+              </div>
+              <button
+                onClick={addEducation}
+                className="pill-btn border border-hair hover:border-ink bg-white text-ink text-xs font-medium py-1.5 px-4 shadow-sm self-start sm:self-auto transition-all"
+              >
+                + Add Education
+              </button>
             </div>
 
-            <div className="space-y-6 mt-12">
+            <div className="space-y-4">
               {data.education.map((edu, idx) => (
                 <div
                   key={edu.id || idx}
-                  className="rounded-3xl bg-surface p-8 sm:p-10 border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
+                  className="bg-white rounded-2xl border border-hair/70 p-5 sm:p-6 shadow-sm transition-all hover:border-hair"
                 >
-                  <div className="flex items-center gap-2.5 mb-5 border-b border-hair/70 pb-4">
-                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-[14px]">
-                      🎓
+                  <div className="flex items-center justify-between pb-3 mb-4 border-b border-hair/50">
+                    <span className="font-semibold text-sm text-ink">
+                      {edu.degree || "Untitled Degree"}
                     </span>
-                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-accent">
-                      Degree Record #{idx + 1}
-                    </p>
+                    <button
+                      type="button"
+                      onClick={() => deleteEducation(idx)}
+                      className="text-xs font-medium text-rose-500 hover:text-rose-700 hover:bg-rose-50 px-2 py-1 rounded-lg transition-colors"
+                    >
+                      Delete
+                    </button>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                         Degree
                       </label>
                       <input
                         type="text"
                         value={edu.degree}
-                        onChange={(e) => {
-                          const list = [...data.education];
-                          list[idx] = { ...list[idx], degree: e.target.value };
-                          setData({ ...data, education: list });
-                        }}
-                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] font-semibold text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                        onChange={(e) => updateEducation(idx, "degree", e.target.value)}
+                        className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all font-medium"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                         Institution / University
                       </label>
                       <input
                         type="text"
                         value={edu.school}
-                        onChange={(e) => {
-                          const list = [...data.education];
-                          list[idx] = { ...list[idx], school: e.target.value };
-                          setData({ ...data, education: list });
-                        }}
-                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                        onChange={(e) => updateEducation(idx, "school", e.target.value)}
+                        className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                      <label className="block text-[11px] font-semibold uppercase tracking-wider text-muted mb-1.5">
                         Duration (Years)
                       </label>
                       <input
                         type="text"
                         value={edu.years}
-                        onChange={(e) => {
-                          const list = [...data.education];
-                          list[idx] = { ...list[idx], years: e.target.value };
-                          setData({ ...data, education: list });
-                        }}
+                        onChange={(e) => updateEducation(idx, "years", e.target.value)}
                         placeholder="2019 – 2023"
-                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                        className="w-full rounded-xl border border-hair/70 bg-surface/30 px-3 py-2 text-sm text-ink outline-none focus:bg-white focus:border-accent focus:ring-2 focus:ring-accent/10 transition-all"
                       />
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          </section>
+          </div>
         )}
       </main>
     </div>
