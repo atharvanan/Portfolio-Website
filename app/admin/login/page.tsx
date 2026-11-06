@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
+import { profile } from "@/lib/data";
 
 export default function AdminLoginPage() {
   const router = useRouter();
@@ -31,43 +33,55 @@ export default function AdminLoginPage() {
 
       router.push("/admin");
       router.refresh();
-    } catch (err) {
+    } catch {
       setError("An unexpected error occurred. Please try again.");
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#0d0d0e] flex items-center justify-center p-6 text-white font-sans">
-      <div className="w-full max-w-md bg-[#161618] border border-white/10 rounded-3xl p-8 sm:p-10 shadow-[0_16px_50px_rgba(0,0,0,0.4)]">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent/10 text-accent text-2xl mb-4 border border-accent/20">
-            🔐
-          </div>
-          <h1 className="text-2xl font-semibold tracking-tight">Portfolio Admin</h1>
-          <p className="text-sm text-white/50 mt-1.5">
-            Enter your admin password to edit your portfolio.
-          </p>
+    <div className="min-h-screen bg-surface flex flex-col items-center justify-center p-6 text-ink font-sans selection:bg-accent/15 selection:text-accent">
+      <div className="w-full max-w-[440px] bg-white rounded-3xl p-10 sm:p-12 border border-black/[0.06] shadow-[0_8px_40px_rgba(0,0,0,0.06)] text-center transition-all duration-500 ease-apple">
+        {/* Profile Avatar matching Hero */}
+        <div className="mx-auto mb-6 h-20 w-20 overflow-hidden rounded-full ring-1 ring-black/[0.06] shadow-[0_4px_20px_rgba(0,0,0,0.06)]">
+          <Image
+            src={profile.photo}
+            alt={profile.name}
+            width={80}
+            height={80}
+            className="h-full w-full object-cover"
+            priority
+          />
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-accent mb-2">
+          Portfolio CMS
+        </p>
+        <h1 className="text-gradient text-3xl font-bold tracking-tightest3">
+          Admin Sign In
+        </h1>
+        <p className="mt-3 text-[15px] text-muted leading-relaxed">
+          Enter your password to access the editing workspace and update your live portfolio.
+        </p>
+
+        <form onSubmit={handleLogin} className="mt-8 space-y-4 text-left">
           <div>
-            <label className="block text-xs font-medium uppercase tracking-wider text-white/60 mb-2">
+            <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
               Password
             </label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter admin password"
+              placeholder="••••••••••••"
               required
               autoFocus
-              className="w-full rounded-xl border border-white/15 bg-white/5 px-4 py-3 text-sm text-white placeholder:text-white/30 outline-none focus:border-accent transition-colors"
+              className="w-full rounded-2xl border border-hair/80 bg-surface/50 px-4 py-3.5 text-[15px] text-ink placeholder:text-muted/40 outline-none focus:border-accent focus:bg-white focus:ring-4 focus:ring-accent/10 transition-all duration-300"
             />
           </div>
 
           {error && (
-            <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs">
+            <div className="rounded-xl bg-rose-50 border border-rose-200/80 p-3.5 text-xs font-medium text-rose-600 animate-fade-in-up">
               {error}
             </div>
           )}
@@ -75,22 +89,22 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-xl bg-accent py-3 text-sm font-medium text-white hover:bg-accent-hover transition-all duration-200 disabled:opacity-50 mt-2 shadow-lg shadow-accent/20"
+            className="pill-btn bg-accent text-white hover:bg-accent-hover w-full py-3.5 mt-3 shadow-[0_4px_16px_rgba(0,113,227,0.25)] hover:shadow-[0_6px_24px_rgba(0,113,227,0.35)] disabled:opacity-50 transition-all duration-300"
           >
-            {loading ? "Signing in..." : "Enter Admin Dashboard →"}
+            {loading ? "Signing in..." : "Open Editor →"}
           </button>
         </form>
 
-        <div className="mt-8 pt-6 border-t border-white/10 text-center">
-          <p className="text-xs text-white/40">
-            Default password: <code className="text-white/70 bg-white/10 px-2 py-0.5 rounded font-mono">admin123</code>
-          </p>
-          <p className="text-[11px] text-white/30 mt-1">
-            (You can customize this anytime via <code className="font-mono text-white/50">ADMIN_PASSWORD</code> in your environment variables).
-          </p>
+        <div className="mt-8 pt-6 border-t border-hair/60 flex items-center justify-between text-xs text-muted">
+          <a
+            href="/"
+            className="hover:text-ink transition-colors duration-200 flex items-center gap-1"
+          >
+            ← Back to Portfolio
+          </a>
+          <span>Protected Session</span>
         </div>
       </div>
     </div>
   );
 }
-

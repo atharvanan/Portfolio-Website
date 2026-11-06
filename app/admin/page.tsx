@@ -21,9 +21,8 @@ export default function AdminDashboardPage() {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<Tab>("experience");
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null);
-  const [storageType, setStorageType] = useState<string>("local");
 
-  // Check authentication & load data
+  // Check authentication & load portfolio data
   useEffect(() => {
     async function init() {
       try {
@@ -50,7 +49,7 @@ export default function AdminDashboardPage() {
 
   const showToast = (message: string, type: "success" | "error" = "success") => {
     setNotification({ message, type });
-    setTimeout(() => setNotification(null), 4000);
+    setTimeout(() => setNotification(null), 4500);
   };
 
   const handleSave = async () => {
@@ -76,7 +75,6 @@ export default function AdminDashboardPage() {
         return;
       }
 
-      setStorageType(resData.storage || "mongodb");
       showToast("🎉 Changes saved! Live website updated instantly.", "success");
     } catch (err) {
       showToast((err as Error).message || "An error occurred while saving.", "error");
@@ -128,11 +126,11 @@ export default function AdminDashboardPage() {
       company: "Company Name",
       location: "City, Country",
       period: "Month Year – Present",
-      bullets: ["Describe your responsibility or achievement here."],
+      bullets: ["Describe key responsibility or achievement here."],
       technologies: ["React.js", "Node.js"],
     };
     setData({ ...data, experience: [newJob, ...data.experience] });
-    showToast("Added new experience record (edit details below)");
+    showToast("Added new experience record");
   };
 
   const deleteExperienceRecord = (index: number) => {
@@ -153,14 +151,15 @@ export default function AdminDashboardPage() {
   const addProject = () => {
     const newProj: Project = {
       id: `proj-${Date.now()}`,
-      name: "New Project",
+      name: "New Project Title",
       year: new Date().getFullYear().toString(),
-      description: "Project description and key impact.",
-      tags: ["Next.js", "TypeScript"],
+      description: "Project overview and engineering impact.",
+      tags: ["Next.js", "TypeScript", "Tailwind CSS"],
       liveUrl: "",
       githubUrl: "",
     };
     setData({ ...data, projects: [newProj, ...data.projects] });
+    showToast("Added new project");
   };
 
   const deleteProject = (index: number) => {
@@ -181,13 +180,14 @@ export default function AdminDashboardPage() {
   const addCert = () => {
     const newCert: Certification = {
       id: `cert-${Date.now()}`,
-      name: "New Certification Name",
-      issuer: "Issuing Organization",
+      name: "Certification Name",
+      issuer: "Microsoft",
       issueDate: new Date().getFullYear().toString(),
       credentialId: "",
       credentialUrl: "",
     };
     setData({ ...data, certifications: [...data.certifications, newCert] });
+    showToast("Added new certification");
   };
 
   const deleteCert = (index: number) => {
@@ -197,194 +197,210 @@ export default function AdminDashboardPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#0d0d0e] flex items-center justify-center text-white/50 font-sans">
-        <div className="flex items-center gap-3">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-accent border-t-transparent" />
-          <span>Loading portfolio editor...</span>
-        </div>
+      <div className="min-h-screen bg-white flex flex-col items-center justify-center text-muted font-sans">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-accent border-t-transparent mb-4" />
+        <p className="text-[15px] font-medium">Loading workspace...</p>
       </div>
     );
   }
 
+  const tabs: { id: Tab; label: string; count?: number }[] = [
+    { id: "experience", label: "Experience", count: data.experience?.length },
+    { id: "projects", label: "Projects", count: data.projects?.length },
+    { id: "certifications", label: "Certifications", count: data.certifications?.length },
+    { id: "skills", label: "Skills", count: data.skillGroups?.length },
+    { id: "profile", label: "About & Profile" },
+    { id: "education", label: "Education", count: data.education?.length },
+  ];
+
   return (
-    <div className="min-h-screen bg-[#0d0d0e] text-white font-sans antialiased pb-24">
-      {/* Sticky Header Bar */}
-      <header className="sticky top-0 z-50 border-b border-white/10 bg-[#121214]/90 backdrop-blur-xl">
-        <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent/10 text-accent font-semibold text-lg border border-accent/20">
-              ⚡
+    <div className="min-h-screen bg-white text-ink font-sans antialiased selection:bg-accent/15 selection:text-accent">
+      {/* =================================================================== */}
+      {/* Sticky Header matching the exact Portfolio Navbar                   */}
+      {/* =================================================================== */}
+      <header className="fixed inset-x-0 top-0 z-50 h-14 backdrop-blur-2xl bg-white/85 border-b border-black/[0.08] shadow-[0_1px_3px_rgba(0,0,0,0.03)] transition-all duration-500 ease-apple">
+        <div className="mx-auto flex h-full max-w-content-wide items-center justify-between px-6">
+          {/* Brand */}
+          <div className="flex items-center gap-3">
+            <span className="text-[15px] font-semibold tracking-tight text-ink">
+              {data.profile.name}
             </span>
-            <div>
-              <h1 className="text-[15px] font-semibold text-white tracking-tight flex items-center gap-2">
-                Portfolio CMS Editor
-                <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  Live Mode
-                </span>
-              </h1>
-              <p className="text-xs text-white/40">
-                Storage: <span className="text-white/70">{storageType === "mongodb" ? "MongoDB Atlas" : "Local / Cloud Sync"}</span>
-              </p>
-            </div>
+            <span className="inline-block rounded-full bg-accent/[0.08] px-2.5 py-0.5 text-[11px] font-semibold tracking-wide text-accent border border-accent/20">
+              CMS Editor
+            </span>
           </div>
 
+          {/* Center Tabs Navigation */}
+          <nav className="relative hidden items-center gap-1 sm:gap-4 md:gap-7 lg:gap-8 md:flex">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`relative py-4 text-[14px] transition-colors duration-300 flex items-center gap-1.5 ${
+                  activeTab === tab.id ? "text-ink font-semibold" : "text-muted hover:text-ink font-normal"
+                }`}
+              >
+                <span>{tab.label}</span>
+                {typeof tab.count === "number" && (
+                  <span
+                    className={`px-1.5 py-0.2 rounded-full text-[10px] font-medium transition-colors ${
+                      activeTab === tab.id
+                        ? "bg-accent/15 text-accent"
+                        : "bg-black/[0.05] text-muted"
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                )}
+                <span
+                  className={`absolute inset-x-0 -bottom-[1px] h-[2px] rounded-full bg-ink transition-all duration-500 ease-apple ${
+                    activeTab === tab.id ? "opacity-100 scale-x-100" : "opacity-0 scale-x-0"
+                  }`}
+                />
+              </button>
+            ))}
+          </nav>
+
+          {/* Right Action Buttons */}
           <div className="flex items-center gap-3">
             <a
               href="/"
               target="_blank"
               rel="noopener noreferrer"
-              className="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2 text-xs font-medium text-white/70 hover:text-white rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-colors"
+              className="pill-btn border-[1.5px] border-hair text-ink text-[13px] py-1.5 px-4 hover:border-ink hover:text-ink transition-all duration-300 hidden sm:inline-flex"
             >
-              <span>View Live Website</span>
-              <span>↗</span>
+              Live Site&nbsp;↗
             </a>
 
             <button
               onClick={handleSave}
               disabled={saving}
-              className="inline-flex items-center gap-2 px-5 py-2 text-xs font-semibold text-white rounded-xl bg-accent hover:bg-accent-hover transition-all duration-200 shadow-md shadow-accent/20 disabled:opacity-50"
+              className="pill-btn bg-accent text-white hover:bg-accent-hover text-[13px] py-1.5 px-5 shadow-[0_2px_12px_rgba(0,113,227,0.25)] hover:shadow-[0_4px_16px_rgba(0,113,227,0.35)] disabled:opacity-50 transition-all duration-300"
             >
-              {saving ? (
-                <>
-                  <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
-                  <span>Saving...</span>
-                </>
-              ) : (
-                <>
-                  <span>💾</span>
-                  <span>Save All Changes</span>
-                </>
-              )}
+              {saving ? "Saving…" : "Save Changes"}
             </button>
 
             <button
               onClick={handleLogout}
-              className="px-3 py-2 text-xs text-white/50 hover:text-white/80 transition-colors"
+              className="text-xs text-muted hover:text-ink transition-colors ml-1"
               title="Sign Out"
             >
-              Sign out
+              Exit
             </button>
           </div>
         </div>
 
-        {/* Navigation Tabs */}
-        <div className="max-w-6xl mx-auto px-6 flex items-center gap-1 overflow-x-auto no-scrollbar border-t border-white/5">
-          {[
-            { id: "experience", label: "💼 Work Experience", count: data.experience?.length },
-            { id: "projects", label: "🚀 Projects", count: data.projects?.length },
-            { id: "certifications", label: "🏅 Certifications", count: data.certifications?.length },
-            { id: "skills", label: "🛠️ Skills", count: data.skillGroups?.length },
-            { id: "profile", label: "👤 Profile & Bio" },
-            { id: "education", label: "🎓 Education", count: data.education?.length },
-          ].map((tab) => (
+        {/* Mobile Sub-Navigation Bar */}
+        <div className="flex items-center gap-2 overflow-x-auto px-6 py-2 border-t border-black/[0.04] bg-surface/80 md:hidden no-scrollbar">
+          {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as Tab)}
-              className={`py-3 px-4 text-xs font-medium transition-colors border-b-2 whitespace-nowrap flex items-center gap-2 ${
+              onClick={() => setActiveTab(tab.id)}
+              className={`px-3 py-1 rounded-full text-xs whitespace-nowrap transition-colors ${
                 activeTab === tab.id
-                  ? "border-accent text-accent"
-                  : "border-transparent text-white/60 hover:text-white"
+                  ? "bg-ink text-white font-medium"
+                  : "bg-white text-muted border border-black/[0.06]"
               }`}
             >
-              <span>{tab.label}</span>
-              {typeof tab.count === "number" && (
-                <span className="px-1.5 py-0.5 rounded-full text-[10px] bg-white/10 text-white/70">
-                  {tab.count}
-                </span>
-              )}
+              {tab.label}
             </button>
           ))}
         </div>
       </header>
 
-      {/* Toast Notification */}
+      {/* Floating Toast Notification */}
       {notification && (
-        <div
-          className={`fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl text-xs font-medium border shadow-2xl flex items-center gap-3 transition-all duration-300 animate-fade-in-up ${
-            notification.type === "success"
-              ? "bg-emerald-950/90 border-emerald-500/30 text-emerald-200"
-              : "bg-rose-950/90 border-rose-500/30 text-rose-200"
-          }`}
-        >
-          <span>{notification.type === "success" ? "✓" : "⚠"}</span>
-          <span>{notification.message}</span>
+        <div className="fixed bottom-8 inset-x-0 z-50 flex justify-center pointer-events-none px-4">
+          <div
+            className={`pointer-events-auto rounded-full px-6 py-3.5 text-[14px] font-medium shadow-[0_12px_36px_rgba(0,0,0,0.18)] flex items-center gap-3 transition-all duration-500 ease-apple animate-fade-in-up ${
+              notification.type === "success"
+                ? "bg-ink text-white"
+                : "bg-rose-600 text-white"
+            }`}
+          >
+            <span>{notification.type === "success" ? "✓" : "⚠"}</span>
+            <span>{notification.message}</span>
+          </div>
         </div>
       )}
 
-      {/* Main Content Area */}
-      <main className="max-w-6xl mx-auto px-6 pt-10">
+      {/* =================================================================== */}
+      {/* Main Content Area                                                   */}
+      {/* =================================================================== */}
+      <main className="mx-auto max-w-content px-6 pt-28 pb-32">
         {/* ================================================================= */}
-        {/* TAB 1: WORK EXPERIENCE */}
+        {/* TAB 1: WORK EXPERIENCE                                            */}
         {/* ================================================================= */}
         {activeTab === "experience" && (
-          <div className="space-y-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold tracking-tight">Work Experience</h2>
-                <p className="text-xs text-white/50 mt-1">
-                  Edit job roles, employment duration, and interactive bullet points.
-                </p>
-              </div>
+          <section className="space-y-12">
+            {/* Section Header */}
+            <div className="flex flex-col items-center gap-3">
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
+                Career
+              </p>
+              <div className="section-divider" />
+              <h2 className="mt-4 text-center text-[32px] sm:text-[40px] md:text-[48px] font-semibold tracking-tight text-ink">
+                Work Experience
+              </h2>
+              <p className="mx-auto mt-2 max-w-xl text-center text-[17px] leading-[1.65] text-muted">
+                Edit roles, companies, dates, and responsibilities. Add or update individual bullet points.
+              </p>
               <button
                 onClick={addExperienceRecord}
-                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-medium text-white border border-white/10 transition-colors flex items-center gap-2"
+                className="pill-btn border-[1.5px] border-accent text-accent hover:bg-accent hover:text-white text-sm py-2 px-6 mt-4"
               >
-                <span>+ Add Experience</span>
+                + Add New Experience
               </button>
             </div>
 
-            <div className="space-y-6">
+            {/* List of Experience Cards */}
+            <div className="space-y-10 mt-12">
               {data.experience.map((job, jobIdx) => (
                 <div
                   key={job.id || jobIdx}
-                  className="rounded-2xl bg-[#161618] border border-white/10 p-6 sm:p-8 space-y-6 shadow-lg"
+                  className="group relative block overflow-hidden rounded-3xl bg-surface p-8 sm:p-12 transition-all duration-500 ease-apple border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.06)]"
                 >
-                  <div className="flex items-start justify-between border-b border-white/10 pb-4">
+                  <div className="flex items-center justify-between border-b border-hair/70 pb-5 mb-6">
                     <div className="flex items-center gap-3">
-                      <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent/10 text-accent font-semibold text-xs border border-accent/20">
-                        {jobIdx + 1}
+                      <span className="inline-block rounded-full bg-accent/[0.08] px-3.5 py-1 text-[12px] font-medium tracking-wide text-accent">
+                        Experience #{jobIdx + 1}
                       </span>
-                      <div>
-                        <h3 className="text-base font-semibold text-white">
-                          {job.role || "Untitled Role"}
-                        </h3>
-                        <p className="text-xs text-white/50">{job.company || "Company"}</p>
-                      </div>
                     </div>
                     <button
+                      type="button"
                       onClick={() => deleteExperienceRecord(jobIdx)}
-                      className="px-3 py-1.5 text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg transition-colors"
+                      className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors"
                     >
-                      Delete
+                      Delete Record
                     </button>
                   </div>
 
-                  {/* Primary fields grid */}
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {/* Primary Details Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                     <div>
-                      <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-accent mb-2">
                         Job Title / Role
                       </label>
                       <input
                         type="text"
                         value={job.role}
                         onChange={(e) => updateExperience(jobIdx, "role", e.target.value)}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
+                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] font-semibold text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-accent mb-2">
                         Company Name
                       </label>
                       <input
                         type="text"
                         value={job.company}
                         onChange={(e) => updateExperience(jobIdx, "company", e.target.value)}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
+                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-accent mb-2">
                         Duration (Period)
                       </label>
                       <input
@@ -392,55 +408,53 @@ export default function AdminDashboardPage() {
                         value={job.period}
                         onChange={(e) => updateExperience(jobIdx, "period", e.target.value)}
                         placeholder="e.g. Apr 2025 – Dec 2025"
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
+                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-accent mb-2">
                         Location
                       </label>
                       <input
                         type="text"
                         value={job.location || ""}
                         onChange={(e) => updateExperience(jobIdx, "location", e.target.value)}
-                        placeholder="e.g. Pune, India (Remote)"
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
+                        placeholder="e.g. Gurugram, India (Remote)"
+                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                       />
                     </div>
                   </div>
 
-                  {/* Bullet Points Section */}
+                  {/* Bullet Points with exact timeline style */}
                   <div className="pt-2">
-                    <div className="flex items-center justify-between mb-3">
-                      <label className="text-[11px] font-medium uppercase tracking-wider text-white/70">
-                        Responsibility Bullet Points ({job.bullets.length})
+                    <div className="flex items-center justify-between mb-4">
+                      <label className="text-xs font-semibold uppercase tracking-[0.15em] text-accent">
+                        Key Responsibilities & Bullet Points ({job.bullets.length})
                       </label>
                       <button
                         type="button"
                         onClick={() => addBulletPoint(jobIdx)}
-                        className="text-xs text-accent hover:text-accent-hover font-medium flex items-center gap-1"
+                        className="text-xs font-medium text-accent hover:underline flex items-center gap-1"
                       >
-                        <span>+ Add Bullet Point</span>
+                        + Add Bullet Point
                       </button>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="space-y-3 pl-2 sm:pl-4 border-l-2 border-hair/60 relative">
                       {job.bullets.map((bullet, bulletIdx) => (
-                        <div key={bulletIdx} className="flex items-start gap-3">
-                          <span className="text-white/30 text-xs font-mono mt-2.5 w-5 text-right">
-                            {bulletIdx + 1}.
-                          </span>
+                        <div key={bulletIdx} className="relative pl-6 flex items-start gap-3">
+                          <span className="absolute left-[-5px] top-4 h-2 w-2 rounded-full bg-accent ring-4 ring-surface" />
                           <textarea
                             rows={2}
                             value={bullet}
                             onChange={(e) => updateBulletPoint(jobIdx, bulletIdx, e.target.value)}
-                            placeholder="Describe achievement, feature built, or responsibility..."
-                            className="flex-1 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent leading-relaxed"
+                            placeholder="Describe achievement, feature built, or engineering impact..."
+                            className="flex-1 rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink leading-relaxed outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                           />
                           <button
                             type="button"
                             onClick={() => removeBulletPoint(jobIdx, bulletIdx)}
-                            className="text-white/40 hover:text-rose-400 mt-2 p-1 rounded transition-colors text-sm"
+                            className="text-muted hover:text-rose-500 mt-3 p-1 transition-colors text-sm"
                             title="Remove bullet"
                           >
                             ✕
@@ -450,9 +464,9 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
 
-                  {/* Technologies Tags */}
-                  <div>
-                    <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
+                  {/* Technologies tags */}
+                  <div className="mt-6 pt-5 border-t border-hair/60">
+                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
                       Technologies Used (comma separated)
                     </label>
                     <input
@@ -462,95 +476,101 @@ export default function AdminDashboardPage() {
                         const tags = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
                         updateExperience(jobIdx, "technologies", tags);
                       }}
-                      placeholder="e.g. React.js, Next.js, Node.js, MongoDB"
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
+                      placeholder="React.js, Next.js, Node.js, Express.js, MongoDB"
+                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                     />
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
         {/* ================================================================= */}
-        {/* TAB 2: PROJECTS */}
+        {/* TAB 2: PROJECTS                                                   */}
         {/* ================================================================= */}
         {activeTab === "projects" && (
-          <div className="space-y-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold tracking-tight">Projects</h2>
-                <p className="text-xs text-white/50 mt-1">
-                  Manage portfolio projects, descriptions, tags, and links.
-                </p>
-              </div>
+          <section className="space-y-12">
+            <div className="flex flex-col items-center gap-3">
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
+                Work
+              </p>
+              <div className="section-divider" />
+              <h2 className="mt-4 text-center text-[32px] sm:text-[40px] md:text-[48px] font-semibold tracking-tight text-ink">
+                Projects
+              </h2>
+              <p className="mx-auto mt-2 max-w-xl text-center text-[17px] leading-[1.65] text-muted">
+                Manage your featured portfolio projects, descriptions, tech stacks, and live demo links.
+              </p>
               <button
                 onClick={addProject}
-                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-medium text-white border border-white/10 transition-colors flex items-center gap-2"
+                className="pill-btn border-[1.5px] border-accent text-accent hover:bg-accent hover:text-white text-sm py-2 px-6 mt-4"
               >
-                <span>+ Add Project</span>
+                + Add New Project
               </button>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-10 mt-12">
               {data.projects.map((proj, idx) => (
                 <div
                   key={proj.id || idx}
-                  className="rounded-2xl bg-[#161618] border border-white/10 p-6 sm:p-8 space-y-5 shadow-lg"
+                  className="group relative block overflow-hidden rounded-3xl bg-surface p-8 sm:p-12 transition-all duration-500 ease-apple border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:shadow-[0_8px_32px_rgba(0,0,0,0.06)]"
                 >
-                  <div className="flex items-start justify-between border-b border-white/10 pb-4">
-                    <h3 className="text-base font-semibold text-white">
-                      {proj.name || "Untitled Project"}
-                    </h3>
+                  <div className="flex items-center justify-between border-b border-hair/70 pb-5 mb-6">
+                    <span className="inline-block rounded-full bg-white px-4 py-1.5 text-xs font-medium tracking-wide text-muted shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
+                      Project #{idx + 1}
+                    </span>
                     <button
+                      type="button"
                       onClick={() => deleteProject(idx)}
-                      className="px-3 py-1.5 text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 rounded-lg transition-colors"
+                      className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors"
                     >
-                      Delete
+                      Delete Project
                     </button>
                   </div>
 
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
                     <div className="sm:col-span-2">
-                      <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
-                        Project Name
+                      <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-accent mb-2">
+                        Project Title
                       </label>
                       <input
                         type="text"
                         value={proj.name}
                         onChange={(e) => updateProject(idx, "name", e.target.value)}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
+                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[18px] font-semibold text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
+                      <label className="block text-xs font-semibold uppercase tracking-[0.1em] text-accent mb-2">
                         Year
                       </label>
                       <input
                         type="text"
                         value={proj.year || ""}
                         onChange={(e) => updateProject(idx, "year", e.target.value)}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
+                        placeholder="2026"
+                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                       />
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
+                  <div className="mb-5">
+                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
                       Description
                     </label>
                     <textarea
                       rows={3}
                       value={proj.description}
                       onChange={(e) => updateProject(idx, "description", e.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent leading-relaxed"
+                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink leading-relaxed outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
-                        Tech Tags (comma separated)
+                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                        Technologies (comma separated)
                       </label>
                       <input
                         type="text"
@@ -559,11 +579,11 @@ export default function AdminDashboardPage() {
                           const tags = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
                           updateProject(idx, "tags", tags);
                         }}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
+                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
+                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
                         Live Demo URL
                       </label>
                       <input
@@ -571,11 +591,11 @@ export default function AdminDashboardPage() {
                         value={proj.liveUrl || ""}
                         onChange={(e) => updateProject(idx, "liveUrl", e.target.value)}
                         placeholder="https://..."
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
+                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
+                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
                         GitHub Repository URL
                       </label>
                       <input
@@ -583,49 +603,55 @@ export default function AdminDashboardPage() {
                         value={proj.githubUrl || ""}
                         onChange={(e) => updateProject(idx, "githubUrl", e.target.value)}
                         placeholder="https://github.com/..."
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
+                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                       />
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
         {/* ================================================================= */}
-        {/* TAB 3: CERTIFICATIONS */}
+        {/* TAB 3: CERTIFICATIONS                                             */}
         {/* ================================================================= */}
         {activeTab === "certifications" && (
-          <div className="space-y-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-xl font-semibold tracking-tight">Certifications</h2>
-                <p className="text-xs text-white/50 mt-1">
-                  Add, edit, or remove professional certifications.
-                </p>
-              </div>
+          <section className="space-y-12">
+            <div className="flex flex-col items-center gap-3">
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
+                Credentials
+              </p>
+              <div className="section-divider" />
+              <h2 className="mt-4 text-center text-[32px] sm:text-[40px] md:text-[48px] font-semibold tracking-tight text-ink">
+                Certifications
+              </h2>
+              <p className="mx-auto mt-2 max-w-xl text-center text-[17px] leading-[1.65] text-muted">
+                Add or modify certifications, issuing bodies, and credential verification URLs.
+              </p>
               <button
                 onClick={addCert}
-                className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs font-medium text-white border border-white/10 transition-colors flex items-center gap-2"
+                className="pill-btn border-[1.5px] border-accent text-accent hover:bg-accent hover:text-white text-sm py-2 px-6 mt-4"
               >
-                <span>+ Add Certification</span>
+                + Add Certification
               </button>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6 mt-12">
               {data.certifications.map((cert, idx) => (
                 <div
                   key={cert.id || idx}
-                  className="rounded-2xl bg-[#161618] border border-white/10 p-6 space-y-4 shadow-lg"
+                  className="rounded-3xl bg-surface p-8 transition-all duration-500 ease-apple border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold text-accent uppercase tracking-wider">
-                      Certification #{idx + 1}
+                  <div className="flex items-center justify-between border-b border-hair/70 pb-4 mb-5">
+                    <span className="text-xs font-semibold uppercase tracking-[0.15em] text-accent flex items-center gap-2">
+                      <span>🏅</span>
+                      <span>Certification #{idx + 1}</span>
                     </span>
                     <button
+                      type="button"
                       onClick={() => deleteCert(idx)}
-                      className="text-xs text-rose-400 hover:text-rose-300"
+                      className="text-xs font-semibold text-rose-500 hover:text-rose-600 transition-colors"
                     >
                       Delete
                     </button>
@@ -633,18 +659,18 @@ export default function AdminDashboardPage() {
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div className="lg:col-span-2">
-                      <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
-                        Certification Title
+                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                        Certification Name
                       </label>
                       <input
                         type="text"
                         value={cert.name}
                         onChange={(e) => updateCert(idx, "name", e.target.value)}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
+                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] font-medium text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
+                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
                         Issuer
                       </label>
                       <input
@@ -652,23 +678,23 @@ export default function AdminDashboardPage() {
                         value={cert.issuer || ""}
                         onChange={(e) => updateCert(idx, "issuer", e.target.value)}
                         placeholder="Microsoft, AWS, etc."
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
+                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
-                        Issue Date (Year)
+                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                        Issue Year
                       </label>
                       <input
                         type="text"
                         value={cert.issueDate || ""}
                         onChange={(e) => updateCert(idx, "issueDate", e.target.value)}
-                        placeholder="2024"
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
+                        placeholder="2026"
+                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                       />
                     </div>
                     <div className="lg:col-span-2">
-                      <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
+                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
                         Credential Verification URL
                       </label>
                       <input
@@ -676,213 +702,255 @@ export default function AdminDashboardPage() {
                         value={cert.credentialUrl || ""}
                         onChange={(e) => updateCert(idx, "credentialUrl", e.target.value)}
                         placeholder="https://..."
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
+                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                       />
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
         {/* ================================================================= */}
-        {/* TAB 4: SKILLS */}
+        {/* TAB 4: SKILLS                                                     */}
         {/* ================================================================= */}
         {activeTab === "skills" && (
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-xl font-semibold tracking-tight">Technical Skills</h2>
-              <p className="text-xs text-white/50 mt-1">
-                Edit skill categories and comma-separated tools, languages, and frameworks.
+          <section className="space-y-12">
+            <div className="flex flex-col items-center gap-3">
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
+                Toolkit
+              </p>
+              <div className="section-divider" />
+              <h2 className="mt-4 text-center text-[32px] sm:text-[40px] md:text-[48px] font-semibold tracking-tight text-ink">
+                Technical Skills
+              </h2>
+              <p className="mx-auto mt-2 max-w-xl text-center text-[17px] leading-[1.65] text-muted">
+                Update technologies, languages, and frameworks in each categorized skill group.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mt-12">
               {data.skillGroups.map((group, idx) => (
                 <div
                   key={group.id || idx}
-                  className="rounded-2xl bg-[#161618] border border-white/10 p-6 space-y-4 shadow-lg"
+                  className="rounded-3xl bg-surface p-7 border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.02)] transition-all duration-500 ease-apple"
                 >
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-accent">
-                    Category: {group.label}
-                  </label>
-                  <div>
-                    <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
-                      Skills List (comma-separated)
-                    </label>
-                    <textarea
-                      rows={5}
-                      value={group.items.join(", ")}
-                      onChange={(e) => {
-                        const items = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
-                        const list = [...data.skillGroups];
-                        list[idx] = { ...list[idx], items };
-                        setData({ ...data, skillGroups: list });
-                      }}
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent leading-relaxed"
-                    />
+                  <p className="text-[13px] font-semibold uppercase tracking-[0.15em] text-accent mb-4">
+                    {group.label}
+                  </p>
+
+                  <textarea
+                    rows={5}
+                    value={group.items.join(", ")}
+                    onChange={(e) => {
+                      const items = e.target.value.split(",").map((s) => s.trim()).filter(Boolean);
+                      const list = [...data.skillGroups];
+                      list[idx] = { ...list[idx], items };
+                      setData({ ...data, skillGroups: list });
+                    }}
+                    className="w-full rounded-2xl border border-hair/80 bg-white p-3.5 text-[14px] text-ink leading-relaxed outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                  />
+
+                  {/* Preview Pills matching the website */}
+                  <div className="flex flex-wrap gap-1.5 mt-4">
+                    {group.items.map((item) => (
+                      <span
+                        key={item}
+                        className="rounded-full bg-white border border-black/[0.06] px-3 py-1 text-[12px] font-medium text-ink shadow-[0_1px_2px_rgba(0,0,0,0.03)]"
+                      >
+                        {item}
+                      </span>
+                    ))}
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
 
         {/* ================================================================= */}
-        {/* TAB 5: PROFILE & ABOUT */}
+        {/* TAB 5: ABOUT & PROFILE                                            */}
         {/* ================================================================= */}
         {activeTab === "profile" && (
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-xl font-semibold tracking-tight">Profile & Professional Summary</h2>
-              <p className="text-xs text-white/50 mt-1">
-                Edit your introduction, headline, summary description, and contact info.
+          <section className="space-y-12">
+            <div className="flex flex-col items-center gap-3">
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
+                Profile
+              </p>
+              <div className="section-divider" />
+              <h2 className="mt-4 text-center text-[32px] sm:text-[40px] md:text-[48px] font-semibold tracking-tight text-ink">
+                About & Bio
+              </h2>
+              <p className="mx-auto mt-2 max-w-xl text-center text-[17px] leading-[1.65] text-muted">
+                Edit your introductory summary, bio paragraph, and contact links.
               </p>
             </div>
 
-            <div className="rounded-2xl bg-[#161618] border border-white/10 p-6 sm:p-8 space-y-6 shadow-lg">
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-accent border-b border-white/10 pb-3">
-                Personal Info
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
-                    Full Name
-                  </label>
-                  <input
-                    type="text"
-                    value={data.profile.name}
-                    onChange={(e) => setData({ ...data, profile: { ...data.profile, name: e.target.value } })}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
-                    Job Title / Subtitle
-                  </label>
-                  <input
-                    type="text"
-                    value={data.profile.title}
-                    onChange={(e) => setData({ ...data, profile: { ...data.profile, title: e.target.value } })}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
-                    Location
-                  </label>
-                  <input
-                    type="text"
-                    value={data.profile.location}
-                    onChange={(e) => setData({ ...data, profile: { ...data.profile, location: e.target.value } })}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
-                  />
-                </div>
-              </div>
-
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-accent border-b border-white/10 pb-3 pt-2">
-                About & Summary Paragraph
-              </h3>
+            <div className="rounded-3xl bg-surface p-8 sm:p-12 border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.02)] space-y-8 mt-12">
               <div>
-                <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
-                  Headline
-                </label>
-                <input
-                  type="text"
-                  value={data.about.headline}
-                  onChange={(e) => setData({ ...data, about: { ...data.about, headline: e.target.value } })}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
-                />
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-accent mb-4 border-b border-hair/60 pb-2">
+                  Personal Details
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                      Full Name
+                    </label>
+                    <input
+                      type="text"
+                      value={data.profile.name}
+                      onChange={(e) => setData({ ...data, profile: { ...data.profile, name: e.target.value } })}
+                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] font-semibold text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                      Job Title / Subtitle
+                    </label>
+                    <input
+                      type="text"
+                      value={data.profile.title}
+                      onChange={(e) => setData({ ...data, profile: { ...data.profile, title: e.target.value } })}
+                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                      Location
+                    </label>
+                    <input
+                      type="text"
+                      value={data.profile.location}
+                      onChange={(e) => setData({ ...data, profile: { ...data.profile, location: e.target.value } })}
+                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                    />
+                  </div>
+                </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
-                  Professional Summary
-                </label>
-                <textarea
-                  rows={4}
-                  value={data.about.summary}
-                  onChange={(e) => setData({ ...data, about: { ...data.about, summary: e.target.value } })}
-                  className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent leading-relaxed"
-                />
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-accent mb-4 border-b border-hair/60 pb-2">
+                  Headline & Summary
+                </p>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                      Headline (Large Heading in About)
+                    </label>
+                    <input
+                      type="text"
+                      value={data.about.headline}
+                      onChange={(e) => setData({ ...data, about: { ...data.about, headline: e.target.value } })}
+                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[17px] font-semibold text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                      Professional Summary Paragraph
+                    </label>
+                    <textarea
+                      rows={5}
+                      value={data.about.summary}
+                      onChange={(e) => setData({ ...data, about: { ...data.about, summary: e.target.value } })}
+                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink leading-relaxed outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <h3 className="text-sm font-semibold uppercase tracking-wider text-accent border-b border-white/10 pb-3 pt-2">
-                Contact & Links
-              </h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                  <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
-                    Email Address
-                  </label>
-                  <input
-                    type="email"
-                    value={data.profile.email}
-                    onChange={(e) => setData({ ...data, profile: { ...data.profile, email: e.target.value } })}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
-                    Phone (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    value={data.profile.phone || ""}
-                    onChange={(e) => setData({ ...data, profile: { ...data.profile, phone: e.target.value } })}
-                    placeholder="+91 ..."
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
-                    GitHub URL
-                  </label>
-                  <input
-                    type="url"
-                    value={data.profile.github}
-                    onChange={(e) => setData({ ...data, profile: { ...data.profile, github: e.target.value } })}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
-                  />
-                </div>
-                <div>
-                  <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
-                    LinkedIn URL
-                  </label>
-                  <input
-                    type="url"
-                    value={data.profile.linkedin}
-                    onChange={(e) => setData({ ...data, profile: { ...data.profile, linkedin: e.target.value } })}
-                    className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
-                  />
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.15em] text-accent mb-4 border-b border-hair/60 pb-2">
+                  Contact & Links
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      value={data.profile.email}
+                      onChange={(e) => setData({ ...data, profile: { ...data.profile, email: e.target.value } })}
+                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                      Phone (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={data.profile.phone || ""}
+                      onChange={(e) => setData({ ...data, profile: { ...data.profile, phone: e.target.value } })}
+                      placeholder="+91 ..."
+                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                      GitHub URL
+                    </label>
+                    <input
+                      type="url"
+                      value={data.profile.github}
+                      onChange={(e) => setData({ ...data, profile: { ...data.profile, github: e.target.value } })}
+                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                      LinkedIn URL
+                    </label>
+                    <input
+                      type="url"
+                      value={data.profile.linkedin}
+                      onChange={(e) => setData({ ...data, profile: { ...data.profile, linkedin: e.target.value } })}
+                      className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[14px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </section>
         )}
 
         {/* ================================================================= */}
-        {/* TAB 6: EDUCATION */}
+        {/* TAB 6: EDUCATION                                                  */}
         {/* ================================================================= */}
         {activeTab === "education" && (
-          <div className="space-y-8">
-            <div>
-              <h2 className="text-xl font-semibold tracking-tight">Education</h2>
-              <p className="text-xs text-white/50 mt-1">
-                Edit degree, institution, and graduation years.
+          <section className="space-y-12">
+            <div className="flex flex-col items-center gap-3">
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-muted">
+                Academics
+              </p>
+              <div className="section-divider" />
+              <h2 className="mt-4 text-center text-[32px] sm:text-[40px] md:text-[48px] font-semibold tracking-tight text-ink">
+                Education
+              </h2>
+              <p className="mx-auto mt-2 max-w-xl text-center text-[17px] leading-[1.65] text-muted">
+                Update your degree, institution, and years of study.
               </p>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-6 mt-12">
               {data.education.map((edu, idx) => (
                 <div
                   key={edu.id || idx}
-                  className="rounded-2xl bg-[#161618] border border-white/10 p-6 space-y-4 shadow-lg"
+                  className="rounded-3xl bg-surface p-8 sm:p-10 border border-black/[0.04] shadow-[0_2px_12px_rgba(0,0,0,0.02)]"
                 >
+                  <div className="flex items-center gap-2.5 mb-5 border-b border-hair/70 pb-4">
+                    <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent/10 text-[14px]">
+                      🎓
+                    </span>
+                    <p className="text-xs font-semibold uppercase tracking-[0.15em] text-accent">
+                      Degree Record #{idx + 1}
+                    </p>
+                  </div>
+
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
+                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
                         Degree
                       </label>
                       <input
@@ -893,11 +961,11 @@ export default function AdminDashboardPage() {
                           list[idx] = { ...list[idx], degree: e.target.value };
                           setData({ ...data, education: list });
                         }}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
+                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] font-semibold text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
+                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
                         Institution / University
                       </label>
                       <input
@@ -908,12 +976,12 @@ export default function AdminDashboardPage() {
                           list[idx] = { ...list[idx], school: e.target.value };
                           setData({ ...data, education: list });
                         }}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
+                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                       />
                     </div>
                     <div>
-                      <label className="block text-[11px] font-medium uppercase tracking-wider text-white/50 mb-1.5">
-                        Duration / Years
+                      <label className="block text-xs font-medium uppercase tracking-[0.1em] text-muted mb-2">
+                        Duration (Years)
                       </label>
                       <input
                         type="text"
@@ -923,14 +991,15 @@ export default function AdminDashboardPage() {
                           list[idx] = { ...list[idx], years: e.target.value };
                           setData({ ...data, education: list });
                         }}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-xs text-white outline-none focus:border-accent"
+                        placeholder="2019 – 2023"
+                        className="w-full rounded-2xl border border-hair/80 bg-white px-4 py-3 text-[15px] text-ink outline-none focus:border-accent focus:ring-4 focus:ring-accent/10 transition-all shadow-[0_1px_3px_rgba(0,0,0,0.02)]"
                       />
                     </div>
                   </div>
                 </div>
               ))}
             </div>
-          </div>
+          </section>
         )}
       </main>
     </div>
