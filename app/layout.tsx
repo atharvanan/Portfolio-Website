@@ -1,15 +1,14 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { siteMetadata } from "@/lib/data";
 
 export const metadata: Metadata = {
-  title: "Atharva Nandurkar — Full Stack Developer (MERN)",
-  description:
-    "Atharva Nandurkar, Full Stack Developer with 2+ years of experience building responsive and scalable web applications using React.js, Next.js, Node.js, Express.js, and MongoDB.",
-  metadataBase: new URL("https://example.com"),
+  title: siteMetadata.title,
+  description: siteMetadata.description,
+  metadataBase: new URL(siteMetadata.siteUrl),
   openGraph: {
-    title: "Atharva Nandurkar — Full Stack Developer (MERN)",
-    description:
-      "Full Stack Developer with 2+ years of experience building responsive and scalable web applications using React.js, Next.js, Node.js, Express.js, and MongoDB.",
+    title: siteMetadata.title,
+    description: siteMetadata.description,
     type: "website",
   },
 };

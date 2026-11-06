@@ -2,13 +2,27 @@
 
 import { useState } from "react";
 import emailjs from "@emailjs/browser";
-import { profile } from "@/lib/data";
+import {
+  profile as defaultProfile,
+  sectionHeaders as defaultSectionHeaders,
+  Profile,
+  SectionHeaders,
+} from "@/lib/data";
 import Reveal from "./Reveal";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
-export default function Contact() {
+export default function Contact({
+  profile: propProfile,
+  sectionHeaders: propHeaders,
+}: {
+  profile?: Profile;
+  sectionHeaders?: SectionHeaders;
+} = {}) {
   const [status, setStatus] = useState<Status>("idle");
+  const profile = propProfile || defaultProfile;
+  const headers = propHeaders || defaultSectionHeaders;
+  const contactHeader = headers?.contact;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -19,7 +33,6 @@ export default function Contact() {
     const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY;
 
     if (!serviceId || !templateId || !publicKey) {
-      // Not configured yet — fall back to opening the visitor's mail app.
       window.location.href = `mailto:${profile.email}`;
       return;
     }
@@ -40,18 +53,25 @@ export default function Contact() {
       <div className="mx-auto max-w-2xl px-5">
         <Reveal>
           <p className="text-center text-sm font-medium uppercase tracking-widest text-white/50">
-            Get in touch
+            {contactHeader?.badge || "Get in touch"}
           </p>
         </Reveal>
         <Reveal delay={80}>
           <h2 className="mt-3 text-center text-3xl font-semibold tracking-tight sm:text-4xl">
-            Let&rsquo;s work together
+            {contactHeader?.title || "Let’s work together"}
           </h2>
         </Reveal>
         <Reveal delay={140}>
           <p className="mx-auto mt-4 max-w-md text-center text-[15px] text-white/60">
             Have a project in mind or an opportunity to discuss? Send a
-            message and I&rsquo;ll reply at {profile.email}.
+            message and I&rsquo;ll reply at{" "}
+            <a
+              href={`mailto:${profile.email}`}
+              className="text-white underline underline-offset-2 transition-colors hover:text-accent"
+            >
+              {profile.email}
+            </a>
+            {profile.phone ? ` or ${profile.phone}` : ""}.
           </p>
         </Reveal>
 
@@ -93,12 +113,12 @@ export default function Contact() {
 
             {status === "sent" && (
               <p className="text-center text-sm text-emerald-400">
-                Thanks — your message has been sent.
+                {contactHeader?.successMessage || "Thanks — your message has been sent."}
               </p>
             )}
             {status === "error" && (
               <p className="text-center text-sm text-rose-400">
-                Something went wrong.{" "}
+                {contactHeader?.errorMessage || "Something went wrong."}{" "}
                 <a href={`mailto:${profile.email}`} className="underline">
                   Email me directly instead
                 </a>

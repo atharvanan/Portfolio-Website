@@ -1,8 +1,10 @@
 import Image from "next/image";
-import { profile } from "@/lib/data";
+import { profile as defaultProfile, Profile } from "@/lib/data";
 import Reveal from "./Reveal";
 
-export default function Hero() {
+export default function Hero({ profile: propProfile }: { profile?: Profile } = {}) {
+  const profile = propProfile || defaultProfile;
+
   return (
     <section id="top" className="relative flex min-h-screen items-center bg-white pt-12">
       <div className="mx-auto w-full max-w-content-wide px-6 py-28 text-center">
@@ -32,15 +34,29 @@ export default function Hero() {
         </Reveal>
 
         <Reveal delay={300}>
-          <div className="mt-10 flex items-center justify-center">
-            <a
-              href={profile.github}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="pill-btn border-[1.5px] border-accent text-accent hover:bg-accent hover:text-white"
-            >
-              GitHub
-            </a>
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
+            {profile.socialLinks && profile.socialLinks.length > 0 ? (
+              profile.socialLinks.map((link) => (
+                <a
+                  key={link.name}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="pill-btn border-[1.5px] border-accent text-accent hover:bg-accent hover:text-white"
+                >
+                  {link.name}
+                </a>
+              ))
+            ) : profile.github ? (
+              <a
+                href={profile.github}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="pill-btn border-[1.5px] border-accent text-accent hover:bg-accent hover:text-white"
+              >
+                GitHub
+              </a>
+            ) : null}
           </div>
         </Reveal>
       </div>

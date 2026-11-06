@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { profile } from "@/lib/data";
+import { useEffect, useState } from "react";
+import { profile as defaultProfile, navLinks as defaultNavLinks, Profile, NavLink } from "@/lib/data";
 
-const links = [
-  { href: "#about", label: "About" },
-  { href: "#projects", label: "Projects" },
-  { href: "#experience", label: "Experience" },
-  { href: "#skills", label: "Skills" },
-  { href: "#contact", label: "Contact" },
-];
-
-export default function Navbar() {
+export default function Navbar({
+  profile: propProfile,
+  navLinks: propNavLinks,
+}: {
+  profile?: Profile;
+  navLinks?: NavLink[];
+} = {}) {
+  const profile = propProfile || defaultProfile;
+  const links = propNavLinks || defaultNavLinks;
   const [active, setActive] = useState("#about");
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -34,7 +34,7 @@ export default function Navbar() {
 
     sections.forEach((s) => observer.observe(s));
     return () => observer.disconnect();
-  }, []);
+  }, [links]);
 
   useEffect(() => {
     const handleScroll = () => {
