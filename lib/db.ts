@@ -124,17 +124,18 @@ export async function savePortfolioData(data: PortfolioData): Promise<{ success:
     }
   }
 
-  // Also save locally whenever possible (e.g. In local development)
-  try {
-    const dir = path.dirname(DATA_FILE_PATH);
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
-    fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(data, null, 2), "utf8");
-  } catch (err) {
-    // In serverless environments, filesystem might be read-only; MongoDB will hold the primary data
-    if (storageType !== "mongodb") {
-      console.warn("[Local file write warning]:", err);
+  // Also save locally whenever possible (local development only, skip on Vercel read-only serverless filesystem)
+  if (!process.env.VERCEL) {
+    try {
+      const dir = path.dirname(DATA_FILE_PATH);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+      fs.writeFileSync(DATA_FILE_PATH, JSON.stringify(data, null, 2), "utf8");
+    } catch (err) {
+      if (storageType !== "mongodb") {
+        console.warn("[Local file write warning]:", err);
+      }
     }
   }
 

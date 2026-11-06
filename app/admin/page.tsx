@@ -57,22 +57,29 @@ export default function AdminDashboardPage() {
     setSaving(true);
     try {
       const res = await fetch("/api/portfolio", {
-        method: "PUT",
+        method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
         body: JSON.stringify(data),
       });
 
-      const resData = await res.json();
+      let resData: any = {};
+      try {
+        resData = await res.json();
+      } catch {
+        resData = { error: `Server returned ${res.status}: ${res.statusText || "Error"}` };
+      }
+
       if (!res.ok) {
-        showToast(resData.error || "Failed to save changes", "error");
+        showToast(resData.error || `Failed to save changes (${res.status})`, "error");
         setSaving(false);
         return;
       }
 
-      setStorageType(resData.storage || "local");
+      setStorageType(resData.storage || "mongodb");
       showToast("🎉 Changes saved! Live website updated instantly.", "success");
     } catch (err) {
-      showToast("An error occurred while saving.", "error");
+      showToast((err as Error).message || "An error occurred while saving.", "error");
     } finally {
       setSaving(false);
     }
